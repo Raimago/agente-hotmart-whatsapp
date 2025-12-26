@@ -16,7 +16,7 @@ import statsRoutes from './routes/stats';
 import conversationsRoutes from './routes/conversations';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Middleware
 app.use(helmet());
@@ -83,13 +83,19 @@ async function startServer() {
     });
 
     // Iniciar servidor
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`🚀 Servidor rodando na porta ${PORT}`);
       logger.info(`📱 Aguardando autenticação do WhatsApp...`);
       logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
     });
+
+    // Tratamento de erros do servidor
+    server.on('error', (error: any) => {
+      logger.error('Erro no servidor:', error);
+    });
   } catch (error: any) {
     logger.error('Erro ao iniciar servidor:', error.message);
+    logger.error('Stack trace:', error.stack);
     process.exit(1);
   }
 }
