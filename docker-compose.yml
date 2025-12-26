@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    env_file:
+      - .env
+    volumes:
+      - ./sessions:/app/sessions
+      - ./data:/app/data
+    restart: unless-stopped
+
