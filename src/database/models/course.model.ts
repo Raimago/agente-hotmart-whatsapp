@@ -5,8 +5,8 @@ export class CourseModel {
   static async create(data: CreateCourseDTO): Promise<Course> {
     return new Promise((resolve, reject) => {
       const sql = `
-        INSERT INTO courses (hotmart_product_id, name, openai_prompt, whatsapp_message_template, active)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO courses (hotmart_product_id, name, openai_prompt, whatsapp_message_template, purchase_link, active)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
       
       db.run(
@@ -16,6 +16,7 @@ export class CourseModel {
           data.name,
           data.openai_prompt,
           data.whatsapp_message_template || null,
+          data.purchase_link || null,
           data.active !== undefined ? data.active : true,
         ],
         function (err) {
@@ -46,6 +47,7 @@ export class CourseModel {
             name: row.name,
             openai_prompt: row.openai_prompt,
             whatsapp_message_template: row.whatsapp_message_template,
+            purchase_link: row.purchase_link,
             active: Boolean(row.active),
             created_at: row.created_at,
             updated_at: row.updated_at,
@@ -70,6 +72,7 @@ export class CourseModel {
             name: row.name,
             openai_prompt: row.openai_prompt,
             whatsapp_message_template: row.whatsapp_message_template,
+            purchase_link: row.purchase_link,
             active: Boolean(row.active),
             created_at: row.created_at,
             updated_at: row.updated_at,
@@ -119,6 +122,10 @@ export class CourseModel {
       if (data.whatsapp_message_template !== undefined) {
         updates.push('whatsapp_message_template = ?');
         values.push(data.whatsapp_message_template);
+      }
+      if (data.purchase_link !== undefined) {
+        updates.push('purchase_link = ?');
+        values.push(data.purchase_link);
       }
       if (data.active !== undefined) {
         updates.push('active = ?');

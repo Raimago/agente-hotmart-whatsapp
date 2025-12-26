@@ -17,6 +17,7 @@ export interface GenerateMessageParams {
   clientName: string;
   clientEmail?: string;
   clientPhone?: string;
+  purchaseLink?: string;
 }
 
 export class OpenAIService {
@@ -32,13 +33,20 @@ Seja conciso (máximo 200 palavras), use emojis moderadamente e foque nos benef�
         .replace(/{nome}/g, params.clientName)
         .replace(/{curso}/g, params.courseName)
         .replace(/{email}/g, params.clientEmail || '')
-        .replace(/{telefone}/g, params.clientPhone || '');
+        .replace(/{telefone}/g, params.clientPhone || '')
+        .replace(/{link}/g, params.purchaseLink || '');
+      
+      // Se o prompt não contém {link} mas temos um link, adiciona no final
+      let finalPrompt = userPrompt;
+      if (params.purchaseLink && !userPrompt.includes('{link}') && !userPrompt.includes(params.purchaseLink)) {
+        finalPrompt = `${userPrompt}\n\nLink para comprar: ${params.purchaseLink}`;
+      }
 
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'user', content: finalPrompt },
         ],
         temperature: 0.7,
         max_tokens: 300,

@@ -4,6 +4,7 @@ export interface Course {
   name: string;
   openai_prompt: string;
   whatsapp_message_template?: string;
+  purchase_link?: string;
   active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -14,6 +15,7 @@ export interface CreateCourseDTO {
   name: string;
   openai_prompt: string;
   whatsapp_message_template?: string;
+  purchase_link?: string;
   active?: boolean;
 }
 
@@ -21,6 +23,7 @@ export interface UpdateCourseDTO {
   name?: string;
   openai_prompt?: string;
   whatsapp_message_template?: string;
+  purchase_link?: string;
   active?: boolean;
 }
 

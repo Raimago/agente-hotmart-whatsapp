@@ -40,6 +40,7 @@ router.post('/hotmart', async (req: Request, res: Response) => {
       clientName: processedData.buyerName,
       clientEmail: processedData.buyerEmail,
       clientPhone: processedData.buyerPhone,
+      purchaseLink: course.purchase_link,
     });
 
     // Enviar mensagem via WhatsApp
