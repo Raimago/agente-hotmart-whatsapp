@@ -56,3 +56,4 @@ temp/
 # Coolify
 .coolify/
 
+env.temp
