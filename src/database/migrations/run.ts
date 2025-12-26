@@ -2,40 +2,73 @@ import { db } from '../db';
 import fs from 'fs';
 import path from 'path';
 
-// Tenta encontrar o arquivo SQL no diretório src ou dist
-const getMigrationFile = (): string => {
-  const srcPath = path.join(__dirname, '../../..', 'src/database/migrations/001_create_tables.sql');
-  const distPath = path.join(__dirname, '001_create_tables.sql');
+// Tenta encontrar os arquivos SQL no diretório de migrações
+const getMigrationFiles = (): string[] => {
+  const migrationDir = path.join(__dirname);
+  const files: string[] = [];
   
-  if (fs.existsSync(srcPath)) {
-    return srcPath;
+  // Busca arquivos .sql no diretório de migrações
+  try {
+    const entries = fs.readdirSync(migrationDir);
+    entries.forEach((entry) => {
+      if (entry.endsWith('.sql')) {
+        files.push(path.join(migrationDir, entry));
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao ler diretório de migrações:', error);
   }
-  if (fs.existsSync(distPath)) {
-    return distPath;
-  }
-  return distPath; // Retorna dist como fallback
+  
+  return files.sort(); // Ordena para executar na ordem
 };
 
 export const runMigrations = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const migrationFile = getMigrationFile();
+    const migrationFiles = getMigrationFiles();
     
-    if (!fs.existsSync(migrationFile)) {
-      reject(new Error(`Arquivo de migração não encontrado: ${migrationFile}`));
+    if (migrationFiles.length === 0) {
+      console.warn('⚠️  Nenhum arquivo de migração encontrado');
+      resolve(); // Não falha, apenas avisa
       return;
     }
 
-    const sql = fs.readFileSync(migrationFile, 'utf8');
-
-    db.exec(sql, (err) => {
-      if (err) {
-        console.error('Erro ao executar migração:', err);
-        reject(err);
-      } else {
-        console.log('✅ Migrações executadas com sucesso');
+    let currentIndex = 0;
+    const executeNext = () => {
+      if (currentIndex >= migrationFiles.length) {
+        console.log('✅ Todas as migrações executadas com sucesso');
         resolve();
+        return;
       }
-    });
+
+      const migrationFile = migrationFiles[currentIndex];
+      console.log(`Executando migração: ${path.basename(migrationFile)}`);
+
+      try {
+        const sql = fs.readFileSync(migrationFile, 'utf8');
+        db.exec(sql, (err) => {
+          if (err) {
+            // Se a tabela já existe, não é um erro fatal
+            if (err.message && err.message.includes('already exists')) {
+              console.log(`⏭️  Migração ${path.basename(migrationFile)} já foi executada`);
+              currentIndex++;
+              executeNext();
+            } else {
+              console.error(`❌ Erro ao executar migração ${path.basename(migrationFile)}:`, err);
+              reject(err);
+            }
+          } else {
+            console.log(`✅ Migração ${path.basename(migrationFile)} executada`);
+            currentIndex++;
+            executeNext();
+          }
+        });
+      } catch (error: any) {
+        console.error(`❌ Erro ao ler arquivo ${path.basename(migrationFile)}:`, error.message);
+        reject(error);
+      }
+    };
+
+    executeNext();
   });
 };
 

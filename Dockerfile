@@ -26,6 +26,10 @@ COPY . .
 # Compilar TypeScript
 RUN npm run build
 
+# Copiar arquivos SQL de migração para o diretório dist
+RUN mkdir -p dist/database/migrations && \
+    cp src/database/migrations/*.sql dist/database/migrations/ 2>/dev/null || true
+
 # Remover dependências de desenvolvimento (opcional, economiza espaço)
 RUN npm prune --production
 
