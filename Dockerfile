@@ -18,13 +18,16 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copiar arquivos de dependências
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copiar código fonte
 COPY . .
 
 # Compilar TypeScript
 RUN npm run build
+
+# Remover dependências de desenvolvimento (opcional, economiza espaço)
+RUN npm prune --production
 
 # Criar diretórios necessários
 RUN mkdir -p /app/sessions /app/data
