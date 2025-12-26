@@ -64,6 +64,23 @@ router.post('/whatsapp', async (req: Request, res: Response) => {
   }
 });
 
+// Status do WhatsApp
+router.get('/whatsapp/status', async (_req: Request, res: Response) => {
+  try {
+    const connected = WhatsAppService.isConnected();
+    
+    return res.json({
+      connected,
+      message: connected 
+        ? 'WhatsApp está conectado' 
+        : 'WhatsApp não está conectado. Verifique os logs para obter o QR code.',
+    });
+  } catch (error: any) {
+    logger.error('Erro ao verificar status do WhatsApp:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Obter QR Code do WhatsApp
 router.get('/whatsapp/qr', async (_req: Request, res: Response) => {
   try {
@@ -71,7 +88,8 @@ router.get('/whatsapp/qr', async (_req: Request, res: Response) => {
     
     if (!qr) {
       return res.status(404).json({
-        error: 'QR Code não disponível. WhatsApp pode já estar conectado.',
+        error: 'QR Code não disponível. WhatsApp pode já estar conectado ou não inicializou.',
+        connected: WhatsAppService.isConnected(),
       });
     }
 
