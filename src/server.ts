@@ -49,8 +49,15 @@ app.use('/health', healthRoutes);
 
 // Rota para interface web do WhatsApp
 app.get('/whatsapp', (_req: Request, res: Response) => {
-  const htmlPath = path.join(__dirname, process.env.NODE_ENV === 'production' ? 'public/whatsapp.html' : '../public/whatsapp.html');
-  res.sendFile(htmlPath);
+  try {
+    // Em produção: __dirname = /app/dist, então public = /app/dist/public
+    // Em desenvolvimento: __dirname = dist, então ../public = src/public
+    const htmlPath = path.join(__dirname, 'public', 'whatsapp.html');
+    res.sendFile(htmlPath);
+  } catch (error: any) {
+    logger.error('Erro ao servir interface WhatsApp:', error.message);
+    res.status(500).json({ error: 'Erro ao carregar interface WhatsApp' });
+  }
 });
 
 // Rota raiz
