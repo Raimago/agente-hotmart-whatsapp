@@ -177,29 +177,46 @@ export class WhatsAppService {
     return new Promise((resolve) => {
       // Se já temos um QR code armazenado, retornar imediatamente
       if (this.currentQRCode) {
+        logger.debug('Retornando QR code armazenado');
         resolve(this.currentQRCode);
         return;
       }
 
       // Se não há cliente ou há erro de inicialização, retornar null
       if (!this.client || this.initializationError) {
+        logger.debug('Cliente não disponível ou há erro de inicialização');
         resolve(null);
         return;
       }
 
       // Se o cliente está pronto (já conectado), não há QR code
       if (this.isReady) {
+        logger.debug('WhatsApp já está conectado, não há QR code');
         resolve(null);
         return;
       }
 
-      // Aguardar pelo evento 'qr' (máximo 5 segundos)
+      // Aguardar pelo evento 'qr' (máximo 10 segundos)
       const timeout = setTimeout(() => {
+        logger.debug('Timeout aguardando QR code, retornando armazenado:', this.currentQRCode);
         resolve(this.currentQRCode);
-      }, 5000);
+      }, 10000);
+
+      // Se o cliente já emitiu o evento 'qr' antes, não vamos recebê-lo novamente
+      // Então vamos verificar se há um QR code pendente
+      if (this.client && !this.isReady) {
+        // Aguardar um pouco para ver se o QR code já foi gerado
+        setTimeout(() => {
+          if (this.currentQRCode) {
+            clearTimeout(timeout);
+            resolve(this.currentQRCode);
+          }
+        }, 1000);
+      }
 
       this.client.once('qr', (qr) => {
         clearTimeout(timeout);
+        logger.debug('QR code recebido via evento');
         this.currentQRCode = qr;
         resolve(qr);
       });
