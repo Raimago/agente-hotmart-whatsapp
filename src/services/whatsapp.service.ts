@@ -77,16 +77,26 @@ export class WhatsAppService {
         logger.error('Erro ao inicializar WhatsApp:', err);
         this.initializationError = err;
         this.currentQRCode = null;
-        // Não rejeitar para não bloquear o servidor
-        // Apenas logar o erro e permitir que o servidor continue
-        setTimeout(() => {
-          logger.warn('Tentando reinicializar WhatsApp em 30 segundos...');
+        
+        // Limpar cliente para tentar novamente
+        if (this.client) {
+          try {
+            this.client.destroy().catch(() => {});
+          } catch (e) {
+            // Ignorar erros ao destruir
+          }
           this.client = null;
-          this.isReady = false;
-          this.initialize().catch(() => {
-            // Ignorar erros de reinicialização
+        }
+        this.isReady = false;
+        
+        // Tentar reinicializar após um delay maior
+        setTimeout(() => {
+          logger.warn('Tentando reinicializar WhatsApp em 60 segundos...');
+          this.initializationError = null;
+          this.initialize().catch((retryErr) => {
+            logger.error('Erro ao reinicializar WhatsApp:', retryErr.message);
           });
-        }, 30000);
+        }, 60000);
       });
     });
   }
