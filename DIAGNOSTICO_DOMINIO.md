@@ -120,3 +120,4 @@ netstat -tlnp | grep 3000
 
 O domínio está apontando corretamente, o problema está na aplicação não estar rodando. Os logs vão mostrar exatamente o que está acontecendo!
 
+

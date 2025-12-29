@@ -164,3 +164,4 @@ curl -X POST http://localhost:3000/api/test/openai \
 
 Pronto! Seu agente está configurado para enviar mensagens personalizadas com links de compra! 🚀
 
+

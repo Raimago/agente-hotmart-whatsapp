@@ -187,3 +187,4 @@ E o status mudará para `connected: true`.
 
 **Dica:** Se o QR code não aparecer, verifique os logs primeiro para ver se há algum erro impedindo a inicialização do WhatsApp.
 
+

@@ -29,3 +29,4 @@ CREATE INDEX IF NOT EXISTS idx_conversations_course_id ON conversations(course_i
 CREATE INDEX IF NOT EXISTS idx_conversations_phone ON conversations(phone_number);
 CREATE INDEX IF NOT EXISTS idx_conversations_created ON conversations(created_at);
 
+

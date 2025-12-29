@@ -155,3 +155,4 @@ Mas vamos tentar primeiro resolver com as soluções mais simples!
 
 **Veja o arquivo `GUIA_CONECTAR_WHATSAPP.md` para instruções mais detalhadas.**
 
+

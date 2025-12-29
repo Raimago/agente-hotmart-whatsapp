@@ -122,3 +122,4 @@ Primeiro precisamos:
 
 **Ação Recomendada:** Reinicie o container e verifique os logs para ver se o erro persiste ou se o QR code aparece.
 
+

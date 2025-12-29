@@ -212,3 +212,4 @@ Procure por: `✅ WhatsApp conectado e pronto!`
 
 **Nota:** Se o erro do Puppeteer persistir, pode ser necessário ajustar as configurações do Chromium no Dockerfile ou usar uma alternativa como WhatsApp Business API.
 
+
