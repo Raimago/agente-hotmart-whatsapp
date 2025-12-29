@@ -349,7 +349,17 @@
             } catch (error) {
                 loading.classList.add('hidden');
                 console.error('Erro ao carregar QR code:', error);
-                message.textContent = 'Erro ao carregar QR code. Verifique se o servidor está funcionando.';
+                let errorMsg = 'Erro ao carregar QR code. ';
+                
+                if (error.message) {
+                    errorMsg += error.message;
+                } else if (error.toString().includes('Failed to fetch') || error.toString().includes('NetworkError')) {
+                    errorMsg += 'Não foi possível conectar ao servidor. Verifique se o servidor está rodando.';
+                } else {
+                    errorMsg += 'Verifique se o servidor está funcionando.';
+                }
+                
+                message.textContent = errorMsg;
                 message.className = 'message message-error';
                 message.classList.remove('hidden');
             }
