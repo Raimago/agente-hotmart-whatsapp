@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -185,8 +186,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .hidden {
@@ -194,6 +200,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>📱 Conectar WhatsApp</h1>
@@ -224,7 +231,8 @@
             <h3>Como conectar:</h3>
             <ol>
                 <li>Abra o WhatsApp no seu celular</li>
-                <li>Vá em <strong>Configurações</strong> → <strong>Aparelhos conectados</strong> → <strong>Conectar um aparelho</strong></li>
+                <li>Vá em <strong>Configurações</strong> → <strong>Aparelhos conectados</strong> → <strong>Conectar um
+                        aparelho</strong></li>
                 <li>Escaneie o QR code exibido acima</li>
                 <li>Aguarde a confirmação de conexão</li>
             </ol>
@@ -250,11 +258,11 @@
                     message.textContent = 'WhatsApp está conectado e pronto para uso!';
                     message.className = 'message message-success';
                     message.classList.remove('hidden');
-                    
+
                     // Esconder QR code se conectado
                     document.getElementById('qrcode').innerHTML = '';
                     document.getElementById('loading').classList.add('hidden');
-                    
+
                     // Parar verificação automática
                     if (checkInterval) {
                         clearInterval(checkInterval);
@@ -267,7 +275,7 @@
                 } else {
                     statusBadge.textContent = '❌ Desconectado';
                     statusBadge.className = 'status-badge status-disconnected';
-                    
+
                     // Tentar obter QR code se desconectado
                     loadQRCode();
                 }
@@ -276,7 +284,7 @@
                 const statusBadge = document.getElementById('statusBadge');
                 statusBadge.textContent = '❌ Erro';
                 statusBadge.className = 'status-badge status-disconnected';
-                
+
                 const message = document.getElementById('message');
                 message.textContent = 'Erro ao verificar status. Tente novamente.';
                 message.className = 'message message-error';
@@ -300,8 +308,13 @@
                 loading.classList.add('hidden');
 
                 if (data.qrCode) {
+                    // Criar canvas para o QR code
+                    const canvas = document.createElement('canvas');
+                    qrcodeDiv.innerHTML = '';
+                    qrcodeDiv.appendChild(canvas);
+
                     // Gerar QR code visual usando a biblioteca QRCode.js
-                    QRCode.toCanvas(qrcodeDiv, data.qrCode, {
+                    QRCode.toCanvas(canvas, data.qrCode, {
                         width: 256,
                         margin: 2,
                         color: {
@@ -311,14 +324,14 @@
                     }, function (error) {
                         if (error) {
                             console.error('Erro ao gerar QR code:', error);
-                            message.textContent = 'Erro ao gerar QR code. Use os logs do servidor.';
+                            message.textContent = 'Erro ao gerar QR code: ' + error.message;
                             message.className = 'message message-error';
                             message.classList.remove('hidden');
                         } else {
                             message.textContent = 'Escaneie o QR code acima com o WhatsApp no seu celular';
                             message.className = 'message message-info';
                             message.classList.remove('hidden');
-                            
+
                             // Verificar status a cada 5 segundos quando QR code está disponível
                             if (!qrCheckInterval) {
                                 qrCheckInterval = setInterval(checkStatus, 5000);
@@ -327,7 +340,7 @@
                     });
                 } else {
                     let errorMsg = data.error || 'QR Code não disponível.';
-                    
+
                     if (data.hasError && data.errorDetails) {
                         errorMsg += `\n\nErro técnico: ${data.errorDetails}`;
                         errorMsg += '\n\nO WhatsApp está tendo problemas para inicializar no ambiente Docker.';
@@ -341,7 +354,7 @@
                     } else {
                         errorMsg += ' O WhatsApp pode estar ainda inicializando. Aguarde alguns segundos e clique em "Atualizar".';
                     }
-                    
+
                     message.textContent = errorMsg;
                     message.className = data.connected ? 'message message-success' : 'message message-error';
                     message.classList.remove('hidden');
@@ -350,7 +363,7 @@
                 loading.classList.add('hidden');
                 console.error('Erro ao carregar QR code:', error);
                 let errorMsg = 'Erro ao carregar QR code. ';
-                
+
                 if (error.message) {
                     errorMsg += error.message;
                 } else if (error.toString().includes('Failed to fetch') || error.toString().includes('NetworkError')) {
@@ -358,7 +371,7 @@
                 } else {
                     errorMsg += 'Verifique se o servidor está funcionando.';
                 }
-                
+
                 message.textContent = errorMsg;
                 message.className = 'message message-error';
                 message.classList.remove('hidden');
@@ -372,7 +385,7 @@
             message.textContent = 'Para gerar um novo QR code, você precisa reiniciar o container. Tente atualizar a página.';
             message.className = 'message message-info';
             message.classList.remove('hidden');
-            
+
             // Recarrega o QR code
             setTimeout(() => {
                 loadQRCode();
@@ -386,6 +399,5 @@
         checkInterval = setInterval(checkStatus, 10000);
     </script>
 </body>
+
 </html>
-
-
