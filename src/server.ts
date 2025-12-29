@@ -60,6 +60,21 @@ app.get('/whatsapp', (_req: Request, res: Response) => {
   }
 });
 
+// Rota para painel administrativo
+app.get('/admin', (_req: Request, res: Response) => {
+  res.redirect('/admin/');
+});
+
+app.get('/admin/', (_req: Request, res: Response) => {
+  try {
+    const htmlPath = path.join(__dirname, 'public', 'admin', 'index.html');
+    res.sendFile(htmlPath);
+  } catch (error: any) {
+    logger.error('Erro ao servir painel admin:', error.message);
+    res.status(500).json({ error: 'Erro ao carregar painel admin' });
+  }
+});
+
 // Rota raiz
 app.get('/', (_req: Request, res: Response) => {
   res.json({
@@ -67,6 +82,7 @@ app.get('/', (_req: Request, res: Response) => {
     version: '1.0.0',
     status: 'running',
     endpoints: {
+      admin: '/admin',
       webhook: '/webhook/hotmart',
       courses: '/api/courses',
       health: '/health',

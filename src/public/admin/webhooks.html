@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhooks - Agente Hotmart WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 20px;
+            color: white;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-link .icon {
+            font-size: 20px;
+        }
+
+        .main {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--dark);
+            font-size: 28px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* URL Box */
+        .url-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .url-box code {
+            flex: 1;
+            font-size: 14px;
+            color: var(--dark);
+            word-break: break-all;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            counter-increment: step;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-number::before {
+            content: counter(step);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            font-size: 15px;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .step-content p {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .step-content code {
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .alert .icon {
+            font-size: 20px;
+        }
+
+        .alert .text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Events List */
+        .events-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .event-badge {
+            background: var(--light);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 300;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            background: var(--success);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <span>🤖</span>
+            <span>Agente Hotmart</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/admin/" class="nav-link"><span
+                        class="icon">📊</span><span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="/admin/courses.html" class="nav-link"><span
+                        class="icon">📚</span><span>Cursos</span></a></li>
+            <li class="nav-item"><a href="/admin/webhooks.html" class="nav-link active"><span
+                        class="icon">🔗</span><span>Webhooks</span></a></li>
+            <li class="nav-item"><a href="/admin/conversations.html" class="nav-link"><span
+                        class="icon">💬</span><span>Conversas</span></a></li>
+            <li class="nav-item"><a href="/admin/flows.html" class="nav-link"><span
+                        class="icon">🔄</span><span>Fluxos</span></a></li>
+            <li class="nav-item"
+                style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <a href="/whatsapp" class="nav-link"><span class="icon">📱</span><span>WhatsApp</span></a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="header">
+            <h1>🔗 Webhooks</h1>
+        </div>
+
+        <!-- URL do Webhook -->
+        <div class="section">
+            <h2 class="section-title">📍 URL do Webhook</h2>
+            <p style="color: var(--gray); margin-bottom: 16px; font-size: 14px;">
+                Configure esta URL na Hotmart para receber notificações de abandono de carrinho.
+            </p>
+            <div class="url-box">
+                <code id="webhookUrl">Carregando...</code>
+                <button class="btn btn-primary" onclick="copyUrl()">
+                    📋 Copiar
+                </button>
+            </div>
+            <div class="alert alert-info">
+                <span class="icon">💡</span>
+                <span class="text">
+                    Substitua o domínio pelo seu domínio real no Coolify. Ex:
+                    <code>https://seu-app.coolify.io/webhook/hotmart</code>
+                </span>
+            </div>
+        </div>
+
+        <!-- Eventos Suportados -->
+        <div class="section">
+            <h2 class="section-title">📡 Eventos Suportados</h2>
+            <p style="color: var(--gray); margin-bottom: 16px; font-size: 14px;">
+                Estes são os eventos que o sistema processa automaticamente:
+            </p>
+            <div class="events-list">
+                <span class="event-badge active">✅ Abandono de Carrinho</span>
+                <span class="event-badge">📦 Compra Realizada (em breve)</span>
+                <span class="event-badge">💳 Compra Cancelada (em breve)</span>
+            </div>
+        </div>
+
+        <!-- Como Configurar -->
+        <div class="section">
+            <h2 class="section-title">📋 Como Configurar na Hotmart</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h4>Acesse o painel da Hotmart</h4>
+                        <p>Faça login em <code>app.hotmart.com</code> e vá para o produto que deseja configurar.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h4>Navegue até Webhooks</h4>
+                        <p>Vá em <strong>Ferramentas</strong> → <strong>Webhooks (API)</strong> →
+                            <strong>Configuração</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h4>Adicione um novo webhook</h4>
+                        <p>Clique em <strong>"Adicionar Webhook"</strong> e cole a URL mostrada acima.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h4>Selecione os eventos</h4>
+                        <p>Marque o evento <strong>"Abandono de Carrinho"</strong> (CART_ABANDONMENT).</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h4>Salve e teste</h4>
+                        <p>Salve a configuração. Use o botão de teste da Hotmart para verificar se está funcionando.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dica Importante -->
+        <div class="section">
+            <div class="alert alert-warning">
+                <span class="icon">⚠️</span>
+                <span class="text">
+                    <strong>Importante:</strong> Certifique-se de que o produto está cadastrado na página de <a
+                        href="/admin/courses.html" style="color: var(--warning);">Cursos</a> com o ID correto antes de
+                    configurar o webhook.
+                </span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">URL copiada!</div>
+
+    <script>
+        // Detect webhook URL
+        function getWebhookUrl() {
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            return `${protocol}//${host}/webhook/hotmart`;
+        }
+
+        // Set URL
+        document.getElementById('webhookUrl').textContent = getWebhookUrl();
+
+        // Copy URL
+        function copyUrl() {
+            const url = getWebhookUrl();
+            navigator.clipboard.writeText(url).then(() => {
+                showToast();
+            }).catch(err => {
+                // Fallback for older browsers
+                const input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast();
+            });
+        }
+
+        // Show toast
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>

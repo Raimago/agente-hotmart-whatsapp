@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos - Agente Hotmart WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 20px;
+            color: white;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-link .icon {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--dark);
+            font-size: 28px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* Table */
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* Status Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px 24px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 6px;
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #ccc;
+            border-radius: 26px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked+.toggle-slider {
+            background: var(--success);
+        }
+
+        .toggle input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Actions Column */
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-edit {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+        }
+
+        .action-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 300;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            background: var(--success);
+        }
+
+        .toast-error {
+            background: var(--danger);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <span>🤖</span>
+            <span>Agente Hotmart</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/admin/" class="nav-link">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/courses.html" class="nav-link active">
+                    <span class="icon">📚</span>
+                    <span>Cursos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/webhooks.html" class="nav-link">
+                    <span class="icon">🔗</span>
+                    <span>Webhooks</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/conversations.html" class="nav-link">
+                    <span class="icon">💬</span>
+                    <span>Conversas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/flows.html" class="nav-link">
+                    <span class="icon">🔄</span>
+                    <span>Fluxos</span>
+                </a>
+            </li>
+            <li class="nav-item"
+                style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <a href="/whatsapp" class="nav-link">
+                    <span class="icon">📱</span>
+                    <span>WhatsApp</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="header">
+            <h1>📚 Cursos</h1>
+            <button class="btn btn-primary" onclick="openModal()">
+                <span>➕</span> Novo Curso
+            </button>
+        </div>
+
+        <div class="section">
+            <div id="coursesContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Novo Curso</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <form id="courseForm" onsubmit="saveCourse(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="courseId">
+
+                    <div class="form-group">
+                        <label for="name">Nome do Curso *</label>
+                        <input type="text" id="name" required placeholder="Ex: Curso de Marketing Digital">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hotmart_product_id">ID do Produto Hotmart *</label>
+                        <input type="text" id="hotmart_product_id" required placeholder="Ex: 12345678">
+                        <p class="form-hint">Encontre o ID na URL do produto no painel da Hotmart</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="openai_prompt">Prompt da OpenAI *</label>
+                        <textarea id="openai_prompt" required
+                            placeholder="Ex: Você é um assistente de vendas amigável. O cliente {nome} abandonou o carrinho do curso {curso}. Gere uma mensagem persuasiva em até 150 palavras..."></textarea>
+                        <p class="form-hint">Use {nome} para o nome do cliente e {curso} para o nome do curso</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="active" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span id="activeLabel">Ativo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let courses = [];
+
+        // Load courses
+        async function loadCourses() {
+            try {
+                const res = await fetch('/api/courses');
+                courses = await res.json();
+                renderCourses();
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                showToast('Erro ao carregar cursos', 'error');
+            }
+        }
+
+        // Render courses table
+        function renderCourses() {
+            const container = document.getElementById('coursesContainer');
+
+            if (!Array.isArray(courses) || courses.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📚</div>
+                        <h3>Nenhum curso cadastrado</h3>
+                        <p>Adicione seu primeiro curso para começar a receber webhooks.</p>
+                        <button class="btn btn-primary" onclick="openModal()">
+                            <span>➕</span> Adicionar Curso
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>ID Hotmart</th>
+                                <th>Status</th>
+                                <th>Criado em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${courses.map(course => `
+                                <tr>
+                                    <td><strong>${course.name}</strong></td>
+                                    <td><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${course.hotmart_product_id}</code></td>
+                                    <td>
+                                        <span class="badge ${course.active ? 'badge-success' : 'badge-danger'}">
+                                            ${course.active ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </td>
+                                    <td>${formatDate(course.created_at)}</td>
+                                    <td class="actions">
+                                        <button class="action-btn action-edit" onclick="editCourse(${course.id})" title="Editar">
+                                            ✏️
+                                        </button>
+                                        <button class="action-btn action-delete" onclick="deleteCourse(${course.id})" title="Excluir">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('pt-BR');
+        }
+
+        // Open modal
+        function openModal(course = null) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('courseForm');
+
+            if (course) {
+                title.textContent = 'Editar Curso';
+                document.getElementById('courseId').value = course.id;
+                document.getElementById('name').value = course.name;
+                document.getElementById('hotmart_product_id').value = course.hotmart_product_id;
+                document.getElementById('openai_prompt').value = course.openai_prompt || '';
+                document.getElementById('active').checked = course.active;
+            } else {
+                title.textContent = 'Novo Curso';
+                form.reset();
+                document.getElementById('courseId').value = '';
+                document.getElementById('active').checked = true;
+            }
+
+            updateActiveLabel();
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Update active label
+        function updateActiveLabel() {
+            const checkbox = document.getElementById('active');
+            const label = document.getElementById('activeLabel');
+            label.textContent = checkbox.checked ? 'Ativo' : 'Inativo';
+        }
+
+        document.getElementById('active').addEventListener('change', updateActiveLabel);
+
+        // Save course
+        async function saveCourse(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('courseId').value;
+            const data = {
+                name: document.getElementById('name').value,
+                hotmart_product_id: document.getElementById('hotmart_product_id').value,
+                openai_prompt: document.getElementById('openai_prompt').value,
+                active: document.getElementById('active').checked
+            };
+
+            try {
+                const url = id ? `/api/courses/${id}` : '/api/courses';
+                const method = id ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || 'Erro ao salvar');
+                }
+
+                showToast(id ? 'Curso atualizado!' : 'Curso criado!', 'success');
+                closeModal();
+                loadCourses();
+            } catch (error) {
+                console.error('Error saving course:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Edit course
+        function editCourse(id) {
+            const course = courses.find(c => c.id === id);
+            if (course) openModal(course);
+        }
+
+        // Delete course
+        async function deleteCourse(id) {
+            const course = courses.find(c => c.id === id);
+            if (!confirm(`Tem certeza que deseja excluir "${course?.name}"?`)) return;
+
+            try {
+                const res = await fetch(`/api/courses/${id}`, { method: 'DELETE' });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || 'Erro ao excluir');
+                }
+
+                showToast('Curso excluído!', 'success');
+                loadCourses();
+            } catch (error) {
+                console.error('Error deleting course:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        // Init
+        loadCourses();
+    </script>
+</body>
+
+</html>
