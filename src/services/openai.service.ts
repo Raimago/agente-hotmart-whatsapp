@@ -1,15 +1,23 @@
 import OpenAI from 'openai';
 import { logger } from '../utils/logger';
 
-const apiKey = process.env.OPENAI_API_KEY;
+let openai: OpenAI | null = null;
 
-if (!apiKey) {
-  throw new Error('OPENAI_API_KEY não configurada');
-}
-
-const openai = new OpenAI({
-  apiKey: apiKey,
-});
+const getOpenAIClient = (): OpenAI => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY não configurada');
+  }
+  
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: apiKey,
+    });
+  }
+  
+  return openai;
+};
 
 export interface GenerateMessageParams {
   prompt: string;
@@ -23,6 +31,8 @@ export interface GenerateMessageParams {
 export class OpenAIService {
   static async generateMessage(params: GenerateMessageParams): Promise<string> {
     try {
+      const client = getOpenAIClient();
+      
       logger.debug('Gerando mensagem com OpenAI', { courseName: params.courseName });
 
       const systemPrompt = `Você é um assistente de vendas especializado em recuperação de carrinho abandonado. 
@@ -42,7 +52,7 @@ Seja conciso (máximo 200 palavras), use emojis moderadamente e foque nos benef�
         finalPrompt = `${userPrompt}\n\nLink para comprar: ${params.purchaseLink}`;
       }
 
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: systemPrompt },
@@ -68,7 +78,8 @@ Seja conciso (máximo 200 palavras), use emojis moderadamente e foque nos benef�
 
   static async testConnection(): Promise<boolean> {
     try {
-      await openai.models.list();
+      const client = getOpenAIClient();
+      await client.models.list();
       return true;
     } catch (error) {
       return false;
