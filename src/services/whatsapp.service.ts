@@ -68,8 +68,14 @@ export class WhatsAppService {
             '--window-size=1280,720',
             '--disable-web-security',
             '--disable-features=VizDisplayCompositor',
+            // Network stability flags for Docker
+            '--single-process',
+            '--no-zygote',
+            '--disable-features=NetworkService,NetworkServiceInProcess',
+            '--dns-prefetch-disable',
+            '--ignore-certificate-errors',
           ],
-          timeout: 90000,
+          timeout: 120000,
           ignoreHTTPSErrors: true,
         },
       });
@@ -109,18 +115,18 @@ export class WhatsAppService {
         logger.error('Erro ao inicializar WhatsApp:', err);
         this.initializationError = err;
         this.currentQRCode = null;
-        
+
         // Limpar cliente para tentar novamente
         if (this.client) {
           try {
-            this.client.destroy().catch(() => {});
+            this.client.destroy().catch(() => { });
           } catch (e) {
             // Ignorar erros ao destruir
           }
           this.client = null;
         }
         this.isReady = false;
-        
+
         // Tentar reinicializar após um delay maior
         setTimeout(() => {
           logger.warn('Tentando reinicializar WhatsApp em 60 segundos...');
