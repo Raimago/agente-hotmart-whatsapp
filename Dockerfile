@@ -32,9 +32,9 @@ RUN npm run build
 RUN mkdir -p dist/database/migrations && \
     cp src/database/migrations/*.sql dist/database/migrations/ 2>/dev/null || true
 
-# Copiar arquivos públicos (interface web)
-RUN mkdir -p dist/public && \
-    cp -r src/public/* dist/public/ 2>/dev/null || true
+# Copiar arquivos públicos (interface web) incluindo subdiretórios
+RUN mkdir -p dist/public/admin && \
+    cp -r src/public/. dist/public/ 2>/dev/null || true
 
 # Remover dependências de desenvolvimento (opcional, economiza espaço)
 RUN npm prune --production
