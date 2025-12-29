@@ -15,6 +15,8 @@ RUN apk add --no-cache \
 # Variáveis de ambiente para Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV CHROMIUM_FLAGS="--no-sandbox --disable-setuid-sandbox"
 
 # Copiar arquivos de dependências
 COPY package*.json ./
