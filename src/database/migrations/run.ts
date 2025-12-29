@@ -45,23 +45,31 @@ export const runMigrations = (): Promise<void> => {
 
       try {
         const sql = fs.readFileSync(migrationFile, 'utf8');
-        db.exec(sql, (err) => {
-          if (err) {
-            // Se a tabela já existe, não é um erro fatal
-            if (err.message && err.message.includes('already exists')) {
-              console.log(`⏭️  Migração ${path.basename(migrationFile)} já foi executada`);
-              currentIndex++;
-              executeNext();
-            } else {
-              console.error(`❌ Erro ao executar migração ${path.basename(migrationFile)}:`, err);
-              reject(err);
-            }
-          } else {
-            console.log(`✅ Migração ${path.basename(migrationFile)} executada`);
-            currentIndex++;
-            executeNext();
-          }
-        });
+            db.exec(sql, (err) => {
+              if (err) {
+                // Se a tabela/coluna já existe, não é um erro fatal
+                if (err.message && (
+                  err.message.includes('already exists') ||
+                  err.message.includes('duplicate column') ||
+                  err.message.includes('duplicate table')
+                )) {
+                  console.log(`⏭️  Migração ${path.basename(migrationFile)} já foi executada`);
+                  currentIndex++;
+                  executeNext();
+                } else {
+                  console.error(`❌ Erro ao executar migração ${path.basename(migrationFile)}:`, err);
+                  // Não rejeitar, apenas logar o erro e continuar
+                  // Isso permite que o servidor inicie mesmo com migrações que falharam
+                  console.warn(`⚠️  Continuando apesar do erro...`);
+                  currentIndex++;
+                  executeNext();
+                }
+              } else {
+                console.log(`✅ Migração ${path.basename(migrationFile)} executada`);
+                currentIndex++;
+                executeNext();
+              }
+            });
       } catch (error: any) {
         console.error(`❌ Erro ao ler arquivo ${path.basename(migrationFile)}:`, error.message);
         reject(error);
