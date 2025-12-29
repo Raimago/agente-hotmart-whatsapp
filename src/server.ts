@@ -61,11 +61,7 @@ app.get('/whatsapp', (_req: Request, res: Response) => {
 });
 
 // Rota para painel administrativo
-app.get('/admin', (_req: Request, res: Response) => {
-  res.redirect('/admin/');
-});
-
-app.get('/admin/', (_req: Request, res: Response) => {
+app.get(['/admin', '/admin/'], (_req: Request, res: Response) => {
   try {
     const htmlPath = path.join(__dirname, 'public', 'admin', 'index.html');
     res.sendFile(htmlPath);
