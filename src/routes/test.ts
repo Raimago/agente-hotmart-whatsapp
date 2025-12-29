@@ -85,11 +85,18 @@ router.get('/whatsapp/status', async (_req: Request, res: Response) => {
 router.get('/whatsapp/qr', async (_req: Request, res: Response) => {
   try {
     const qr = await WhatsAppService.getQRCode();
+    const error = WhatsAppService.getInitializationError();
     
     if (!qr) {
+      const errorMessage = error 
+        ? `Erro na inicialização: ${error.message}. O WhatsApp pode estar tendo problemas com o Puppeteer no ambiente Docker.`
+        : 'QR Code não disponível. WhatsApp pode já estar conectado ou ainda está inicializando.';
+      
       return res.status(404).json({
-        error: 'QR Code não disponível. WhatsApp pode já estar conectado ou não inicializou.',
+        error: errorMessage,
         connected: WhatsAppService.isConnected(),
+        hasError: !!error,
+        errorDetails: error ? error.message : undefined,
       });
     }
 

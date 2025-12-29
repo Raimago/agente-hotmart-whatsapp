@@ -7,6 +7,8 @@ const SESSION_PATH = process.env.WHATSAPP_SESSION_PATH || './sessions';
 export class WhatsAppService {
   private static client: Client | null = null;
   private static isReady = false;
+  private static currentQRCode: string | null = null;
+  private static initializationError: Error | null = null;
 
   static initialize(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -44,6 +46,9 @@ export class WhatsAppService {
         logger.info('QR Code gerado. Escaneie com seu WhatsApp:');
         qrcode.generate(qr, { small: true });
         console.log('\n');
+        // Armazenar QR code para acesso via API
+        this.currentQRCode = qr;
+        this.initializationError = null;
       });
 
       this.client.on('ready', () => {
@@ -70,7 +75,18 @@ export class WhatsAppService {
 
       this.client.initialize().catch((err) => {
         logger.error('Erro ao inicializar WhatsApp:', err);
-        reject(err);
+        this.initializationError = err;
+        this.currentQRCode = null;
+        // Não rejeitar para não bloquear o servidor
+        // Apenas logar o erro e permitir que o servidor continue
+        setTimeout(() => {
+          logger.warn('Tentando reinicializar WhatsApp em 30 segundos...');
+          this.client = null;
+          this.isReady = false;
+          this.initialize().catch(() => {
+            // Ignorar erros de reinicialização
+          });
+        }, 30000);
       });
     });
   }
@@ -117,21 +133,39 @@ export class WhatsAppService {
 
   static getQRCode(): Promise<string | null> {
     return new Promise((resolve) => {
-      if (!this.client) {
+      // Se já temos um QR code armazenado, retornar imediatamente
+      if (this.currentQRCode) {
+        resolve(this.currentQRCode);
+        return;
+      }
+
+      // Se não há cliente ou há erro de inicialização, retornar null
+      if (!this.client || this.initializationError) {
         resolve(null);
         return;
       }
 
-      // O QR code é emitido no evento 'qr', então precisamos esperar
-      const timeout = setTimeout(() => {
+      // Se o cliente está pronto (já conectado), não há QR code
+      if (this.isReady) {
         resolve(null);
-      }, 30000);
+        return;
+      }
+
+      // Aguardar pelo evento 'qr' (máximo 5 segundos)
+      const timeout = setTimeout(() => {
+        resolve(this.currentQRCode);
+      }, 5000);
 
       this.client.once('qr', (qr) => {
         clearTimeout(timeout);
+        this.currentQRCode = qr;
         resolve(qr);
       });
     });
+  }
+
+  static getInitializationError(): Error | null {
+    return this.initializationError;
   }
 
   static isConnected(): boolean {

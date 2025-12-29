@@ -326,8 +326,24 @@
                         }
                     });
                 } else {
-                    message.textContent = data.error || 'QR Code não disponível. O WhatsApp pode já estar conectado ou há um erro na inicialização.';
-                    message.className = 'message message-error';
+                    let errorMsg = data.error || 'QR Code não disponível.';
+                    
+                    if (data.hasError && data.errorDetails) {
+                        errorMsg += `\n\nErro técnico: ${data.errorDetails}`;
+                        errorMsg += '\n\nO WhatsApp está tendo problemas para inicializar no ambiente Docker.';
+                        errorMsg += '\nIsso é comum em ambientes containerizados. Tente:';
+                        errorMsg += '\n1. Reiniciar o container no Coolify';
+                        errorMsg += '\n2. Verificar os logs do servidor';
+                        errorMsg += '\n3. Aguardar alguns minutos e tentar novamente';
+                    } else if (data.connected) {
+                        errorMsg = 'WhatsApp já está conectado! Não é necessário QR code.';
+                        message.className = 'message message-success';
+                    } else {
+                        errorMsg += ' O WhatsApp pode estar ainda inicializando. Aguarde alguns segundos e clique em "Atualizar".';
+                    }
+                    
+                    message.textContent = errorMsg;
+                    message.className = data.connected ? 'message message-success' : 'message message-error';
                     message.classList.remove('hidden');
                 }
             } catch (error) {
